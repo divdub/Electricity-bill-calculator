@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Electricity Cost Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+        }
+        .output p {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Room Electricity Cost Calculator</h1>
+    <div class="container">
+        <div class="input-group">
+            <label for="totalBill">Total Bill Amount:</label>
+            <input type="number" id="totalBill" placeholder="Enter total bill amount">
+        </div>
+        <div class="input-group">
+            <label for="totalUnit">Total Units Consumed:</label>
+            <input type="number" id="totalUnit" placeholder="Enter total units consumed">
+        </div>
+        <div class="input-group">
+            <label for="rooms">Number of Rooms:</label>
+            <input type="number" id="rooms" placeholder="Enter number of rented rooms">
+        </div>
+        <div id="roomInputs"></div>
+        <button onclick="generateRoomInputs()">Add Room Readings</button>
+        <div class="output" id="result"></div>
+    </div>
+
+    <script>
+        let roomDetails = [];
+        
+        function generateRoomInputs() {
+            const rooms = parseInt(document.getElementById("rooms").value);
+            const container = document.getElementById("roomInputs");
+            container.innerHTML = ''; // Clear previous inputs
+            roomDetails = [];
+            
+            for (let i = 0; i < rooms; i++) {
+                container.innerHTML += `
+                    <div class="input-group">
+                        <label>Room ${i + 1} - Old Unit Reading:</label>
+                        <input type="number" id="oldUnit${i}" placeholder="Enter old reading for room ${i + 1}">
+                    </div>
+                    <div class="input-group">
+                        <label>Room ${i + 1} - New Unit Reading:</label>
+                        <input type="number" id="newUnit${i}" placeholder="Enter new reading for room ${i + 1}">
+                    </div>
+                `;
+            }
+            container.innerHTML += `
+                <button onclick="calculateCosts()">Calculate Costs</button>
+            `;
+        }
+
+        function calculateCosts() {
+            const totalBill = parseFloat(document.getElementById("totalBill").value);
+            const totalUnit = parseFloat(document.getElementById("totalUnit").value);
+            const rooms = parseInt(document.getElementById("rooms").value);
+            const perUnit = totalBill / totalUnit;
+
+            let tempCost = 0;
+            roomDetails = [];
+            for (let i = 0; i < rooms; i++) {
+                const oldUnit = parseFloat(document.getElementById(`oldUnit${i}`).value);
+                const newUnit = parseFloat(document.getElementById(`newUnit${i}`).value);
+                const finalReading = newUnit - oldUnit;
+                const roomCost = finalReading * perUnit;
+                tempCost += roomCost;
+
+                roomDetails.push({
+                    room: i + 1,
+                    finalReading,
+                    roomCost
+                });
+            }
+
+            const otherCost = (totalBill - tempCost) / (rooms + 1);
+            let resultHTML = `<p>Per Unit Cost: ${perUnit.toFixed(2)}</p>`;
+            resultHTML += `<p>Shared Other Costs: ${otherCost.toFixed(2)}</p>`;
+
+            roomDetails.forEach(detail => {
+                const finalCost = detail.roomCost + otherCost;
+                resultHTML += `<p>Final Cost for Room ${detail.room}: ${finalCost.toFixed(2)}</p>`;
+            });
+
+            document.getElementById("result").innerHTML = resultHTML;
+        }
+    </script>
+</body>
+</html>
